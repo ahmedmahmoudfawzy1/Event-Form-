@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { getQuestions } from '../api.js'
-import { isLoggedIn, login } from '../auth.js'
 
 // Read questions are tracked per browser (the API has no "done" field).
 const DONE_KEY = 'done-questions'
@@ -24,60 +23,6 @@ function saveDone(done) {
 const questionKey = (item) => String(item.id ?? `${item.name}|${item.created_at ?? item.createdAt}|${item.questions}`)
 
 export default function AdminPage() {
-  const [authed, setAuthed] = useState(isLoggedIn)
-
-  if (!authed) return <LoginGate onSuccess={() => setAuthed(true)} />
-  return <QuestionsList />
-}
-
-function LoginGate({ onSuccess }) {
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    const ok = await login(password)
-    setLoading(false)
-    if (ok) onSuccess()
-    else setError('كلمة السر غلط')
-  }
-
-  return (
-    <div className="animate-fade-up mx-auto max-w-sm">
-      <form onSubmit={handleSubmit} className="card p-6 text-center sm:p-8">
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-blue-50 dark:bg-blue-500/15">
-          <svg className="h-6 w-6 text-blue-600 dark:text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="4" y="11" width="16" height="10" rx="2" />
-            <path d="M8 11V7a4 4 0 0 1 8 0v4" />
-          </svg>
-        </div>
-        <h1 className="mt-4 text-xl font-bold">لوحة المحاضر</h1>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">ادخل كلمة السر عشان تشوف الأسئلة</p>
-
-        <input
-          type="password"
-          autoFocus
-          value={password}
-          onChange={(e) => {
-            setPassword(e.target.value)
-            setError('')
-          }}
-          placeholder="كلمة السر"
-          className={`input mt-6 text-center ${error ? 'input-error' : ''}`}
-        />
-        {error && <p className="mt-2 text-sm text-rose-600 dark:text-rose-400">{error}</p>}
-
-        <button type="submit" disabled={loading || !password} className="btn-primary mt-5 w-full">
-          دخول
-        </button>
-      </form>
-    </div>
-  )
-}
-
-function QuestionsList() {
   const [questions, setQuestions] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
